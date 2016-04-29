@@ -3,5 +3,8 @@ CASCrm/bin
 HTTPManager/obj
 HTTPManager/bin
 CASLauncher/obj
-CASMetaData/bin
-CASMetaData/obj
+CASLauncher/bin
+CASLib/bin
+CASLib/obj
+libs
+tests

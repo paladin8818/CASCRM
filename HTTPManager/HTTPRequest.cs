@@ -20,15 +20,11 @@ namespace HTTPManager
 	/// </summary>
 	/// 
 	
-	public enum ContentType : int {
-		ApplicationXWWWFormUrlencoded,
-		TextHtml,
-		ApplicationJSON
-	};
+
 	
-	public class HTTPManager
+	public class HTTPRequest
 	{
-		private static HTTPManager _instanse = null;
+		private static HTTPRequest _instanse = null;
 		private string uri;
 		private Dictionary<string, string> parameters = 
 			new Dictionary<string, string>();
@@ -36,6 +32,15 @@ namespace HTTPManager
 		private string contentType = "application/x-www-form-urlencoded";
 		
 		private static CookieContainer cookieContainer = new CookieContainer();
+		
+		public CookieContainer CurrentCookie {
+			get {
+				return HTTPRequest.cookieContainer;
+			}
+			set {
+				HTTPRequest.cookieContainer = value;
+			}
+		}
 		
 		public string Uri {
 			get {return this.uri;}
@@ -65,16 +70,16 @@ namespace HTTPManager
 			}
 		}
 		
-		private HTTPManager() {}
+		private HTTPRequest() {}
 		
-		private static HTTPManager create (string uri) {
-			HTTPManager._instanse = new HTTPManager();
-			HTTPManager._instanse.uri = uri;
-			return HTTPManager._instanse;
+		private static HTTPRequest create (string uri) {
+			HTTPRequest._instanse = new HTTPRequest();
+			HTTPRequest._instanse.uri = uri;
+			return HTTPRequest._instanse;
 		}
 		
-		public static HTTPManager Create(string uri) {
-			return HTTPManager.create(uri);
+		public static HTTPRequest Create(string uri) {
+			return HTTPRequest.create(uri);
 		}
 		
 		public void addParameter (string k, string v) {
@@ -97,7 +102,7 @@ namespace HTTPManager
 				(HttpWebRequest)WebRequest.Create(this.uri + "?" + this.parametersToRequestString());
 			request.Method = "GET";
 			if(this.useCookie) {
-				request.CookieContainer = HTTPManager.cookieContainer;
+				request.CookieContainer = HTTPRequest.cookieContainer;
 			}
 			request.ContentType = this.contentType;
 			return this.exec(request);
@@ -108,7 +113,7 @@ namespace HTTPManager
 				(HttpWebRequest)WebRequest.Create(this.uri);
 			request.Method = "POST";
 			if(this.useCookie) {
-				request.CookieContainer = HTTPManager.cookieContainer;
+				request.CookieContainer = HTTPRequest.cookieContainer;
 			}
 			request.ContentType = this.contentType;
 			this.writeByteParameters(this.parametersToRequestString(), request);			
@@ -153,7 +158,7 @@ namespace HTTPManager
 		}
 		
 		public static void ClearCookie () {
-			HTTPManager.cookieContainer = new CookieContainer();
+			HTTPRequest.cookieContainer = new CookieContainer();
 		}
 		
 		public void ClearParameters () {

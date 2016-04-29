@@ -1,9 +1,91 @@
 ﻿<Window x:Class="CASLauncher.MainWindow"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	Title="CASLauncher" Height="300" Width="300"
-	>
+	Title="Вход в систему"
+	Height="225"
+	Width="400"
+	WindowStartupLocation="CenterScreen"
+	ResizeMode="NoResize">
 	<Grid>
-		
+		<GroupBox
+			Header="Логин пользователя"
+			Grid.Column="0"
+			Grid.Row="0"
+			HorizontalAlignment="Stretch"
+			VerticalAlignment="Top"
+			Margin="8,8,8,0">
+			<Grid
+				Margin="2,2,2,2">
+				<TextBox
+					HorizontalAlignment="Stretch"
+					x:Name="textBoxLogin"
+					Height="23" />
+			</Grid>
+		</GroupBox>
+		<GroupBox
+			Header="Пароль пользователя"
+			Grid.Column="0"
+			Grid.Row="0"
+			HorizontalAlignment="Stretch"
+			VerticalAlignment="Top"
+			Margin="8,67,8,0">
+			<Grid
+				Margin="2,2,2,2">
+				<PasswordBox
+					HorizontalAlignment="Stretch"
+					x:Name="passwordBoxPassword"
+					Height="23"/>
+			</Grid>
+		</GroupBox>
+		<CheckBox
+			VerticalContentAlignment="Center"
+			Content="Расширенная настройка"
+			x:Name="checkBoxExtSettingsToggle"
+			Grid.Column="0"
+			Grid.Row="0"
+			HorizontalAlignment="Right"
+			VerticalAlignment="Top"
+			Margin="0,126,8,0"
+			Width="165"
+			Height="23"/>
+		<GroupBox
+			x:Name="groupBoxExtSettings"
+			Visibility="Hidden"
+			Header="Сервер данных"
+			Grid.Column="0"
+			Grid.Row="0"
+			HorizontalAlignment="Stretch"
+			VerticalAlignment="Top"
+			Margin="8,157,8,0"
+			Height="51">
+			<Grid
+				Margin="2,2,2,2">
+				<TextBox
+					x:Name="textBoxHost"
+					Height="23"/>
+			</Grid>
+		</GroupBox>
+		<Button
+			Content="Вход"
+			x:Name="buttonLogIn"
+			Grid.Column="0"
+			Grid.Row="0"
+			HorizontalAlignment="Right"
+			VerticalAlignment="Bottom"
+			Width="75"
+			Height="25"
+			Margin="0,0,8,8"/>
+		<Label
+			Visibility="Hidden"
+			Content="Проверка обновлений"
+			VerticalContentAlignment="Center"
+			x:Name="labelCurrentStatus"
+			Width="209"
+			Height="25"
+			Grid.Column="0"
+			Grid.Row="0"
+			HorizontalAlignment="Left"
+			VerticalAlignment="Bottom"
+			Margin="8,0,0,8" />
 	</Grid>
 </Window>
