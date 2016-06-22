@@ -7,6 +7,8 @@
  * Для изменения этого шаблона используйте Сервис | Настройка | Кодирование | Правка стандартных заголовков.
  */
 using System;
+using System.IO;
+using System.Text;
 
 namespace CASLib
 {
@@ -15,8 +17,17 @@ namespace CASLib
 	/// </summary>
 	public class Log
 	{
-		public Log()
-		{
+		private Log() {}
+		
+		public static void Write (string message) {
+			message = DateTime.Now.ToString() + ": " + message + "\n\r";
+			File.AppendAllText("log.txt", message, Encoding.UTF8);
 		}
+		
+		public static void WriteError (string message) {
+			message = DateTime.Now.ToString() + ": " + message + "\n\r";
+			File.AppendAllText("error.txt", message, Encoding.UTF8);
+		}
+		
 	}
 }

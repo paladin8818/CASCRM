@@ -13,10 +13,15 @@ namespace CASLib
 	/// <summary>
 	/// Description of AuthData.
 	/// </summary>
-	public class AuthData
+	internal class AuthData
 	{
-		public AuthData()
-		{
-		}
+		public int Id {get; set;}
+		//public string FullName {get; set;}
+		public string Username {get; set;}
+		//public int IdRole {get; set;}
+		public string AccessToken {get; set;}
+		
+		
+		public AuthData() {}
 	}
 }

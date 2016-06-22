@@ -7,6 +7,8 @@
  * Для изменения этого шаблона используйте меню "Инструменты | Параметры | Кодирование | Стандартные заголовки".
  */
 using System;
+using System.Collections.Generic;
+using CASCrm.ViewModel;
 
 namespace CASCrm.Models
 {
@@ -15,22 +17,36 @@ namespace CASCrm.Models
 	/// </summary>
 	public class Category : Core.BaseModel
 	{
+		public override string Link {
+			get {
+				return "/categories";
+			}
+		}
+		private static CategoryVM viewModel = CategoryVM.instance();
 		
-		public int Id { get; set; }
 		public string Title { get; set; }
+		public int Row_order { get; set; }
 		
 		public Category(){}
 		
-		public static void load () {
+		protected override Dictionary<string, object> prepareSaveParams()
+		{
+			Dictionary<string, object> parameters =
+				new Dictionary<string, object> ();
+			parameters.Add("title", Title);
+			parameters.Add("row_order", Row_order);
 			
+			return parameters;
 		}
 		
-		public void save () {
-			
+		protected override void afterSave()
+		{
+			viewModel.add(this);
 		}
 		
-		public void remove () {
-			
+		protected override void afterRemove()
+		{
+			viewModel.remove(this);
 		}
 	}
 }

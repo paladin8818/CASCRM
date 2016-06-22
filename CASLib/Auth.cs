@@ -20,85 +20,93 @@ namespace CASLib
 	/// </summary>
 	public class Auth
 	{
-		public int Id {get; private set;}
-		public string FullName {get; private set;}
-		public string Login {get; private set;}
-		public int IdRole {get; private set;}
+		private AuthData authData = null;
+		
+		public int? Id {
+			get {
+				if(authData != null) {
+					return authData.Id;
+				}
+				return null;
+			}
+		}
+		
+		public string AccessToken {
+			get {
+				if(authData != null) {
+					return authData.AccessToken;
+				}
+				return null;
+			}
+		}
+		
+		//Uri ресурса, на которм авторизуется пользователяь 
+		private Uri uri;
 		
 		//Последняя ошибка, произошедшая при попытке авторизации или загрузке пользователя
 		public string LastError {get; private set;}
-		
-		//Хранит куки текущего авторизованного пользователя
-		private CookieContainer cookie;
 
-		//Авторизован ли пользователь
-		public bool IsAuth {get; private set;}
+		//Словарь "авторизаций"
+		//Ключ - строка url, значение - экземпляр класса Auth 
+		//с данными авторизованного пользователя
+		// ПРЕДУСМАТРИВАЕТСЯ ВОЗМОЖНОСТЬ АВТОРИЗАЦИИ НА РАЗНЫХ ДОМЕНАХ В ОДНОМ ПРИЛОЖЕНИИ
+		private static Dictionary<string, Auth> AuthDict = null;
+		
+		//Инициализация словаря "авторизаций"
+		public void InitAuthDict () {
+			if(Auth.AuthDict == null) {
+				Auth.AuthDict = new Dictionary<string, Auth>();
+			}
+		}
+		
+		//Получить экземпляр класса Auth если пользователь авторизован на этом ресурсе
+		//Иначе null
+		public static Auth AuthByUri (Uri uri) {
+			if(Auth.AuthDict.ContainsKey(uri.ToString())) {
+				return Auth.AuthDict[uri.ToString()];
+			}
+			return null;
+		}
 		
 		//Значения, введенные пользователем для авторизации
-		public string UserEntity {get;set;}
 		public string UserLogin {get;set;}
 		public string UserPassword {get;set;}
 		
-		public Auth(string url) {
-			Settings.url = url;
+		public Auth(string uri) {
+			this.uri = new Uri(uri);
+			this.InitAuthDict();
+		}
+
+		public Auth(Uri uri) {
+			this.uri = uri;			
+			this.InitAuthDict();
 		}
 		
 		public bool auth () {
 			if(!this.checkAuthData()) {
 				return false;
 			}
-			
-			HTTPRequest http = HTTPRequest.Create(Settings.url);
-			http.addParameter("entity", UserEntity);
-			http.addParameter("login", UserLogin);
-			http.addParameter("password", UserPassword);
-			
+			HTTPRequest http = HTTPRequest.Create(this.uri);
+			http.Authorization = "Basic " + authDataToB64(UserLogin, UserPassword);
 			try {
-				string response = http.post();
+				string response = http.get();				
+				if(this.parseResponse(response)) {
+					Auth.AuthDict[this.uri.ToString()] = this;
+					return true;
+				}
+				else {
+					return false;
+				}
+			}
+			catch (Exception ex) {
+				LastError = "Ошибка при выполнении http запроса: \n" + ex.Message ;				
+				return false;
+			}
+		}
 				
-				if(this.parseResponse(response)) {
-					IsAuth = true;
-					cookie = http.CurrentCookie;
-					return true;
-				}
-				else return false;
-			}
-			catch (Exception ex) {
-				LastError = "Ошибка при выполнении http запроса: \n" + ex.Message ;
-				return false;
-			}
-		}
-		
-		public bool loadCurrentUser () {
-			if(Settings.url == "" || Settings.url == null) {
-				LastError = "Пустой URL сервера данных.";
-				return false;
-			}
-			HTTPRequest http = HTTPRequest.Create(Settings.url);
-			http.addParameter("entity", UserEntity);
-			
-			try {
-				string response = http.post();
-				if(this.parseResponse(response)) {
-					IsAuth = true;	
-					cookie = http.CurrentCookie;					
-					return true;
-				}
-				else return false;
-			}
-			catch (Exception ex) {
-				LastError = "Ошибка при выполнении http запроса: \n" + ex.Message ;
-				return false;
-			}
-		}
-		
 		private bool checkAuthData () {
-			if(Settings.url == "" || Settings.url == null) {
+			if(this.uri == null) {
 				LastError = "Пустой URL сервера данных.";
-				return false;
-			}
-			if(UserEntity == "" || UserEntity == null) {
-				LastError = "Необходимый параметр (метод-контроллер) не был получен.";
 				return false;
 			}
 			if(UserLogin == "" || UserLogin == null) {
@@ -113,89 +121,32 @@ namespace CASLib
 		}
 		
 		private bool parseResponse(string response) {
-			try {
-				JArray result = JArray.Parse(response);
-				if((Int32)result[0] != 0) {
-					LastError = result[1].ToString();
-					return false;
+			//парсим ответ			
+			ResponseParser responseParser = new ResponseParser(response);
+			//если нет ошибок
+			if(responseParser.Parse() && responseParser.IsServerError == false) {
+				authData = responseParser.ResponseDataToObject<AuthData>();
+				if(authData != null) {
+					return true;
 				}
-				try {
-					Dictionary<string, string> userData =
-						result[1].ToObject<Dictionary<string, string>>();
-					if(this.parseUserData(userData))
-						return true;
-					else
-						return false;
-				}
-				catch(Exception ex) {
-					LastError = ex.Message;
+				else {
+					LastError = (responseParser.LastError != null) ? responseParser.LastError : LastError;
 					return false;
 				}
 			}
-			catch (Exception ex) {
-				LastError = ex.Message;
+			else {
+				LastError = "Ошибка 2: " + ((responseParser.ServerError == null) ? 
+				                          responseParser.LastError : responseParser.ServerError);
 				return false;
 			}
 		}
 		
-		private bool parseUserData (Dictionary<string, string> userData) {
-			
-			//Проверка, вернул ли сервер Id пользователя
-			
-			if(userData.ContainsKey("id")) {	
-				try {
-					Id = Int32.Parse(userData["id"]);
-				}
-				catch (Exception ex) {
-					LastError = "Поступили некорректные данные (Id) от сервера.\n" +
-						ex.Message;
-					return false;
-				}
+		private string authDataToB64 (string token, string password = null) {
+			if(password != null) {
+				return System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(token + ":" + password));
 			}
-			else {
-				LastError = "Сервер не вернул Id пользователя";
-				return false;
-			}
-			
-			//Проверка, вернул ли сервер корректный FullName пользователя
-			
-			if(userData.ContainsKey("name")) {
-				FullName = userData["name"];
-			}
-			else {
-				LastError = "Сервер не вернул Name пользователя";
-				return false;
-			}
-			
-			//Проверка, вернул ли сервер корректный Login пользователя
-			
-			if(userData.ContainsKey("login")) {
-				Login = userData["login"];
-			}
-			else {
-				LastError = "Сервер не вернул Login пользователя";
-				return false;
-			}
-			
-			//Проверка, вернул ли сервер корректный Role пользователя
-			
-			if(userData.ContainsKey("role")) {
-				try {
-					IdRole = Int32.Parse(userData["role"]);
-				}
-				catch (Exception ex) {
-					LastError = "Поступили некорректные данные (Role) от сервера.\n" +
-						ex.Message;
-					return false;
-				}
-			}
-			else {
-				LastError = "Сервер не вернул Role пользователя";
-				return false;
-			}
-			
-			return true;
-			
+			return System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(token));
 		}
+		
 	}
 }

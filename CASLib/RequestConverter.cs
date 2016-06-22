@@ -7,6 +7,7 @@
  * Для изменения этого шаблона используйте Сервис | Настройка | Кодирование | Правка стандартных заголовков.
  */
 using System;
+using Newtonsoft.Json;
 
 namespace CASLib
 {
@@ -15,8 +16,11 @@ namespace CASLib
 	/// </summary>
 	public class RequestConverter
 	{
-		public RequestConverter()
-		{
+		private RequestConverter() {}
+		
+		public static string Convert <T> (T t) {
+			return JsonConvert.SerializeObject(t, Formatting.Indented);
 		}
+		
 	}
 }

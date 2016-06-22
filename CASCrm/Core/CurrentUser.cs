@@ -15,8 +15,18 @@ namespace CASCrm.Core
 	/// </summary>
 	public class CurrentUser
 	{
-		public CurrentUser()
-		{
+		private static CurrentUser _instance = null;
+		
+		public int Id { get; set; }
+		public string Username { get; set; }
+		public string AccessToken { get; set; }
+		
+		private CurrentUser() {}
+		public static CurrentUser instance() {
+			if(_instance == null) {
+				_instance = new CurrentUser();
+			}
+			return _instance;
 		}
 	}
 }

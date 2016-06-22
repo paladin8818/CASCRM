@@ -7,13 +7,15 @@
  * Для изменения этого шаблона используйте Сервис | Настройка | Кодирование | Правка стандартных заголовков.
  */
 using System;
+using System.IO;
+using System.Net;
 
 namespace HTTPManager
 {
 	/// <summary>
-	/// Description of Download.
+	/// Description of Downloader.
 	/// </summary>
-	public class Download
+	public class Downloader
 	{
 		private Uri uri;
 		
@@ -22,12 +24,25 @@ namespace HTTPManager
 			private set;
 		}
 		
-		public Download(Uri uri) {
+		public Downloader(Uri uri) {
 			this.uri = uri;
 		}
 		
-		public Download(string uri){
+		public Downloader(string uri){
 			this.uri = new Uri(uri);
 		}
+		
+		public bool Download (string path) {
+			WebClient webClient = new WebClient();
+			try {
+				webClient.DownloadFile(this.uri, path);
+				return true;
+			}
+			catch(Exception ex) {
+				this.LastError = ex.Message;
+				return false;
+			}
+		}
+		
 	}
 }

@@ -4,88 +4,155 @@
 	Title="Вход в систему"
 	Height="225"
 	Width="400"
+   	Background="#1e1e1e"
 	WindowStartupLocation="CenterScreen"
+    WindowStyle="None"
 	ResizeMode="NoResize">
 	<Grid>
-		<GroupBox
-			Header="Логин пользователя"
-			Grid.Column="0"
-			Grid.Row="0"
-			HorizontalAlignment="Stretch"
+		<Label Margin="5, 5, 0, 0" VerticalAlignment="Top" Content="CASCRM Client v0.1" Grid.Row="0" Grid.Column="0" Foreground="White" />
+		<Label
+			x:Name="lblClose"
 			VerticalAlignment="Top"
-			Margin="8,8,8,0">
-			<Grid
-				Margin="2,2,2,2">
-				<TextBox
-					HorizontalAlignment="Stretch"
-					x:Name="textBoxLogin"
-					Height="23" />
-			</Grid>
-		</GroupBox>
-		<GroupBox
-			Header="Пароль пользователя"
-			Grid.Column="0"
-			Grid.Row="0"
-			HorizontalAlignment="Stretch"
-			VerticalAlignment="Top"
-			Margin="8,67,8,0">
-			<Grid
-				Margin="2,2,2,2">
-				<PasswordBox
-					HorizontalAlignment="Stretch"
-					x:Name="passwordBoxPassword"
-					Height="23"/>
-			</Grid>
-		</GroupBox>
-		<CheckBox
-			VerticalContentAlignment="Center"
-			Content="Расширенная настройка"
-			x:Name="checkBoxExtSettingsToggle"
-			Grid.Column="0"
-			Grid.Row="0"
+			Cursor="Hand"
+			Margin="0, 5, 5, 0"
 			HorizontalAlignment="Right"
-			VerticalAlignment="Top"
-			Margin="0,126,8,0"
-			Width="165"
-			Height="23"/>
-		<GroupBox
-			x:Name="groupBoxExtSettings"
-			Visibility="Hidden"
-			Header="Сервер данных"
-			Grid.Column="0"
+			FontWeight="Bold"
+			Foreground="White"
+			FontSize="14"
+			Content="X"
 			Grid.Row="0"
-			HorizontalAlignment="Stretch"
-			VerticalAlignment="Top"
-			Margin="8,157,8,0"
-			Height="51">
-			<Grid
-				Margin="2,2,2,2">
-				<TextBox
-					x:Name="textBoxHost"
-					Height="23"/>
+			Grid.Column="1">
+			<Label.Style>
+				<Style TargetType="Label">
+					<Style.Triggers>
+						<Trigger Property="IsMouseOver" Value="True">
+							<Setter Property="Foreground" Value="Red"></Setter>
+						</Trigger>
+					</Style.Triggers>
+				</Style>
+			</Label.Style>
+		</Label>
+		<Grid Margin="20, 40, 20, 20">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="Auto"></RowDefinition>
+			</Grid.RowDefinitions>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="150"></ColumnDefinition>
+				<ColumnDefinition Width="*"></ColumnDefinition>
+			</Grid.ColumnDefinitions>
+
+			<Label
+				Grid.Column="0"
+				Grid.Row="0"
+				Foreground="White"
+				Content="Логин пользователя">
+			</Label>
+			<TextBox
+				Background="#9e9e9e"
+				BorderBrush="Transparent"
+				Foreground="White"
+				FontStyle="Italic"
+				Grid.Column="1"
+				Grid.Row="0"
+				Margin="0, 0, 0, 5"
+				Padding="2"
+				HorizontalAlignment="Stretch"
+				x:Name="tbxLogin" />
+			<Label 
+				Grid.Column="0"
+				Grid.Row="1"
+				Foreground="White"
+				Content="Пароль пользователя" />
+			<PasswordBox
+				Background="#9e9e9e"
+				BorderBrush="Transparent"
+				Foreground="White"
+				FontStyle="Italic"
+				Grid.Column="1"
+				Grid.Row="1"
+				Margin="0, 5, 0, 0"
+				Padding="2"
+				HorizontalAlignment="Stretch"
+				x:Name="tbxPassword"/>
+			<Grid Grid.Row="2" Grid.Column="1" Margin="0, 5">
+				<Grid.RowDefinitions>
+					<RowDefinition></RowDefinition>
+				</Grid.RowDefinitions>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition></ColumnDefinition>
+					<ColumnDefinition Width="Auto"></ColumnDefinition>
+				</Grid.ColumnDefinitions>
+				<Label 
+					x:Name="lblFullSettingToggle"
+					Grid.Row="0" 
+					Grid.Column="0" 
+					VerticalAlignment="Center"
+					HorizontalAlignment="Right"
+					Content="Расширенная настройка"
+					Foreground="White">
+				</Label>
+				<CheckBox
+					VerticalContentAlignment="Center"
+					x:Name="cbxFullSettingsToggle"
+					Grid.Column="1"
+					Grid.Row="0"
+					Background="#9e9e9e"
+					BorderBrush="#9e9e9e"
+					HorizontalAlignment="Right"
+					VerticalAlignment="Center"/>
 			</Grid>
-		</GroupBox>
+			<Border HorizontalAlignment="Stretch" Visibility="Collapsed" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" x:Name="rowSettings">
+				<Grid HorizontalAlignment="Stretch">
+					<Grid.RowDefinitions>
+						<RowDefinition></RowDefinition>
+					</Grid.RowDefinitions>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="150"></ColumnDefinition>
+						<ColumnDefinition Width="*"></ColumnDefinition>
+					</Grid.ColumnDefinitions>
+					<Label Foreground="White" Grid.Row="0" Grid.Column="0" Content="Сервер данных"></Label>
+					<TextBox
+						HorizontalAlignment="Stretch"
+						Grid.Row="0"
+						Grid.Column="1"
+						Background="#9e9e9e"
+						BorderBrush="Transparent"
+						Foreground="White"
+						FontStyle="Italic"
+						Margin="0, 0, 0, 5"
+						Padding="2"
+						x:Name="tbxHost"/>
+				</Grid>
+			</Border>
+		</Grid>
 		<Button
+			BorderBrush="Transparent"
+			Background="#9e9e9e"
+			Foreground="White"
 			Content="Вход"
-			x:Name="buttonLogIn"
+			x:Name="btnLogin"
 			Grid.Column="0"
 			Grid.Row="0"
 			HorizontalAlignment="Right"
 			VerticalAlignment="Bottom"
 			Width="75"
 			Height="25"
-			Margin="0,0,8,8"/>
+			Margin="0,0,20,20"/>
 		<Label
+			Foreground="White"
 			Visibility="Hidden"
 			Content="Проверка обновлений"
 			VerticalContentAlignment="Center"
-			x:Name="labelCurrentStatus"
+			x:Name="lblCurrentStatus"
 			Width="209"
 			Height="25"
 			Grid.Column="0"
 			Grid.Row="0"
 			HorizontalAlignment="Left"
 			VerticalAlignment="Bottom"
-			Margin="8,0,0,8" />
+			Margin="20,0,0,20" />
 	</Grid>
 </Window>

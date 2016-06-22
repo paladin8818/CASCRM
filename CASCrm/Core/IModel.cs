@@ -15,6 +15,7 @@ namespace CASCrm.Core
 	/// </summary>
 	public interface IModel
 	{
-		
+		bool save ();
+		bool remove ();
 	}
 }

@@ -15,7 +15,7 @@ namespace CASLib
 	/// </summary>
 	public class Settings
 	{
-		public static string url;
+		public static Uri uri;
 		private Settings() {}
 	}
 }

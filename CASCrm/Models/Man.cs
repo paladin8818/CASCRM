@@ -13,10 +13,16 @@ namespace CASCrm.Models
 	/// <summary>
 	/// Description of Man.
 	/// </summary>
-	public class Man
+	public abstract class Man
 	{
-		public Man()
-		{
+		public string SurName {get; set;}
+		public string FirstName {get;set;}
+		public string Patronymic {get;set;}
+		public string FullName {
+			get {
+				return SurName + " " + FirstName + " " + Patronymic;
+			}
 		}
+		
 	}
 }

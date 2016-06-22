@@ -17,6 +17,7 @@ namespace HTTPManager
 {
 	public enum ContentType : int {
 		ApplicationXWWWFormUrlencoded,
+		MultipartFormData,
 		TextHtml,
 		ApplicationJSON
 	};

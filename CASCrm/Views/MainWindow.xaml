@@ -1,8 +1,10 @@
 ﻿<Window x:Class="CASCrm.Views.MainWindow"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	Title="CASCrm" Height="300" Width="300"
-	>
+	Title="CASCrm" Height="300" Width="300"    	
+    Background="#1e1e1e"
+    WindowState="Maximized"
+	WindowStartupLocation="CenterScreen">
 	<Grid>
 		
 	</Grid>

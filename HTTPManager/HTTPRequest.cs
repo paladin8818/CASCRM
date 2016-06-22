@@ -9,6 +9,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -25,11 +26,17 @@ namespace HTTPManager
 	public class HTTPRequest
 	{
 		private static HTTPRequest _instanse = null;
-		private string uri;
-		private Dictionary<string, string> parameters = 
-			new Dictionary<string, string>();
-		private bool useCookie = true;
+		private Uri uri;
+		private Dictionary<string, object> parameters = 
+			new Dictionary<string, object>();
+		private bool useCookie = false;
 		private string contentType = "application/x-www-form-urlencoded";
+		private string accept = "application/json";
+		private string authorization = null;
+		
+		public static string LastError {
+			get; private set;
+		}
 		
 		private static CookieContainer cookieContainer = new CookieContainer();
 		
@@ -42,12 +49,12 @@ namespace HTTPManager
 			}
 		}
 		
-		public string Uri {
+		public Uri Uri {
 			get {return this.uri;}
 			set {this.uri = value;}
 		}
 		
-		public Dictionary<string, string> Parameters {
+		public Dictionary<string, object> Parameters {
 			get {return this.parameters;}
 			set {this.parameters = value;}
 		}
@@ -57,6 +64,7 @@ namespace HTTPManager
 		}
 		private string [] contentTypes = {
 			"application/x-www-form-urlencoded",
+			"multipart/form-data",
 			"text/html",
 			"application/json"
 		};
@@ -70,19 +78,40 @@ namespace HTTPManager
 			}
 		}
 		
+		public string Authorization {
+			get {
+				return this.authorization;
+			}
+			set {
+				this.authorization = value;
+			}
+		}
+		
+		
 		private HTTPRequest() {}
 		
-		private static HTTPRequest create (string uri) {
+		private static HTTPRequest create (Uri uri) {
 			HTTPRequest._instanse = new HTTPRequest();
 			HTTPRequest._instanse.uri = uri;
 			return HTTPRequest._instanse;
 		}
 		
 		public static HTTPRequest Create(string uri) {
+			try {
+				Uri newUri = new Uri(uri);
+				return HTTPRequest.create(newUri);
+			}
+			catch(Exception ex) {
+				HTTPRequest.LastError = ex.Message;
+				return null;
+			}
+		}
+		
+		public static HTTPRequest Create (Uri uri) {
 			return HTTPRequest.create(uri);
 		}
 		
-		public void addParameter (string k, string v) {
+		public void addParameter (string k, object v) {
 			if(this.parameters.ContainsKey(k)) {
 				this.parameters[k] = v;
 			}
@@ -97,35 +126,60 @@ namespace HTTPManager
 			}
 		}
 		
-		public string get () {
-			HttpWebRequest request = 
-				(HttpWebRequest)WebRequest.Create(this.uri + "?" + this.parametersToRequestString());
+		public string get (string partUri = null, string json = null) {
+			HttpWebRequest request = createRequest(partUri);
 			request.Method = "GET";
-			if(this.useCookie) {
-				request.CookieContainer = HTTPRequest.cookieContainer;
-			}
-			request.ContentType = this.contentType;
+			setRequestParams(request, json);
 			return this.exec(request);
 		}
 		
-		public string post () {
-			HttpWebRequest request = 
-				(HttpWebRequest)WebRequest.Create(this.uri);
+		public string post (string partUri = null, string json = null) {
+			HttpWebRequest request = createRequest(partUri);
 			request.Method = "POST";
+			setRequestParams(request, json);
+			return this.exec(request);
+		}
+		
+		public string put (string partUri = null, string json = null) {
+			HttpWebRequest request = createRequest(partUri);
+			request.Method = "PUT";
+			setRequestParams(request, json);
+			return this.exec(request);
+		}
+		
+		public string delete (string partUri = null, string json = null) {
+			HttpWebRequest request = createRequest(partUri);
+			request.Method = "DELETE";
+			setRequestParams(request, json);
+			return this.exec(request);
+		}
+
+		private HttpWebRequest createRequest (string partUri) {
+			return (HttpWebRequest)WebRequest.Create(this.uri + ((partUri != null) ? "/" + partUri : ""));
+		}
+		
+		private void setRequestParams (HttpWebRequest request, string json = null) {
 			if(this.useCookie) {
 				request.CookieContainer = HTTPRequest.cookieContainer;
 			}
 			request.ContentType = this.contentType;
-			this.writeByteParameters(this.parametersToRequestString(), request);			
-			return this.exec(request);
+			request.Accept = this.accept;
+			if(this.authorization != null) {
+				request.Headers.Add("Authorization", this.authorization);
+			}
+			if(json != null) {
+				this.writeByteParameters(json, request);
+			}
+			else {
+				this.writeByteParameters(this.parametersToRequestString(), request);	
+			}
 		}
 		
-		//TODO: Реализовать методы put и delete
 		//TODO: Реализовать асинхронное выполнение запросов
 		//TODO: Реализовать загрузчик файлов
 		
 		
-		private string exec (HttpWebRequest request) {
+		private string exec (HttpWebRequest request, string json = null) {
 			WebResponse response = request.GetResponse();
 			StreamReader reader = new StreamReader(response.GetResponseStream(),
 			                                       Encoding.UTF8);
@@ -139,8 +193,8 @@ namespace HTTPManager
 		private string parametersToRequestString () {
 			// disable once LocalVariableHidesMember
 			ArrayList parameters = new ArrayList();
-			foreach(KeyValuePair<string, string> p in this.parameters) {
-				parameters.Add(String.Format(p.Key + "={0}", p.Value));
+			foreach(KeyValuePair<string, object> p in this.parameters) {
+				parameters.Add(String.Format(p.Key + "={0}", p.Value.ToString()));
 			}
 			return String.Join("&", parameters.ToArray());
 		}
